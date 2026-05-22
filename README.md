@@ -1,5 +1,7 @@
 # phantom-enterprise
 
+[![CI](https://github.com/markl-a/phantom-enterprise/actions/workflows/ci.yml/badge.svg)](https://github.com/markl-a/phantom-enterprise/actions/workflows/ci.yml)
+
 > **phantom-mesh × 企業 on-prem 環境連接器** — LDAP/SSO、VPN-aware routing、
 > MES/ERP、Confluence/Jira、on-prem GitLab/Gitea、Apple Silicon HA;招聘對齊
 > 鼎新 / 中信 / 鴻海 / 聯發科等台廠 enterprise 棧。
