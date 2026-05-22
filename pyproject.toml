@@ -15,6 +15,10 @@ dev = [
     "pytest>=7",
 ]
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ldap_sso*", "vpn_aware_routing*", "on_prem_gitlab*", "mes_connector*", "erp_connector*", "confluence_jira*", "apple_silicon_ha*"]
+
 [tool.pytest.ini_options]
 testpaths = [
     "ldap_sso/tests",
