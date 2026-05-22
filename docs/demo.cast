@@ -1,0 +1,6 @@
+{"version":3,"term":{"cols":80,"rows":24},"timestamp":1779466475,"idle_time_limit":2.0,"command":"/tmp/demo-scripts/enterprise.sh","title":"phantom-enterprise Tier 1 demo (VPN-aware routing)","env":{"SHELL":"/bin/zsh"}}
+[0.516, "o", "$ python -c \"from vpn_aware_routing.router import tailscale_route; ...\"\r\n"]
+[1.072, "o", "API signature: (node_hostname: 'str') -> 'Optional[str]'\r\n\r\nReturn the tailnet IP for ``node_hostname``, or None if not found.\r\n\r\n"]
+[0.096, "o", "tailscale_route('demo-host-not-on-tailnet') -> None\r\n# (None = host not found; real hosts return their tailnet IPv4)\r\n"]
+[1.016, "o", "\r\n# phantom-enterprise: live Tailscale lookup wired (2/7 connectors live)\r\n"]
+[2.013, "x", "0"]
