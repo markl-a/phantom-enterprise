@@ -1,7 +1,7 @@
 """Proof-of-concept enterprise connector against a real on-prem Git host.
 
-Validated daily against the maintainer's self-hosted **Gitea on z13**
-(``http://100.87.70.65:3000``) over Tailscale. The same URL-shape works
+Validated daily against a maintainer's self-hosted **Gitea** (set the
+``GITEA_BASE_URL`` env var to your tailnet host) over Tailscale. The same URL-shape works
 unmodified for self-hosted GitLab — only the ``/api/v1`` path differs
 (``/api/v4`` for GitLab) and that swap is the first thing to add when a
 real GitLab instance is in scope.
@@ -13,13 +13,15 @@ Public API:
 
 from __future__ import annotations
 
+import os
 from typing import Optional
 from urllib.parse import urljoin
 
 import requests
 
-DEFAULT_BASE_URL = "http://100.87.70.65:3000"
-"""Maintainer's self-hosted Gitea on z13 (reachable over Tailscale)."""
+DEFAULT_BASE_URL = os.environ.get("GITEA_BASE_URL", "http://gitea.internal:3000")
+"""On-prem Gitea/GitLab base URL. Set ``GITEA_BASE_URL`` to your tailnet host
+(e.g. ``http://<tailnet-host>:3000``); the placeholder default is unreachable."""
 
 
 class GiteaUnreachable(RuntimeError):

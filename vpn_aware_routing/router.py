@@ -94,7 +94,7 @@ def tailscale_route(node_hostname: str) -> Optional[str]:
             ``"markmacbook-air"``.
 
     Returns:
-        IPv4 string (e.g. ``"100.87.70.65"``) or None.
+        IPv4 string (e.g. ``"100.x.y.z"``) or None.
     """
     target = (node_hostname or "").lower().strip()
     if not target:

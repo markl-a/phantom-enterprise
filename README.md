@@ -71,8 +71,8 @@ What actually runs today:
 
 - `vpn_aware_routing.router.tailscale_route('z13')` → 真實 IP 從
   `tailscale status --json` 抓
-- `on_prem_gitlab.connector.list_repos()` → 真實打 `http://100.87.70.65:3000`
-  (作者 z13 Gitea over Tailscale)
+- `on_prem_gitlab.connector.list_repos()` → 打 `GITEA_BASE_URL`(預設 placeholder,
+  作者設成自架 Gitea over Tailscale)
 - `ldap_sso.auth.*` → 3 ABC subclasses,全部 `NotImplementedError`(shape
   proven, impl deferred 到有真實 AD 可測時)
 

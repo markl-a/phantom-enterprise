@@ -19,7 +19,7 @@ def _z13_reachable() -> bool:
 
 pytestmark = pytest.mark.skipif(
     not _z13_reachable(),
-    reason="z13 Gitea (100.87.70.65:3000) not reachable — needs live Tailscale + z13 online",
+    reason="on-prem Gitea (set GITEA_BASE_URL) not reachable — needs live Tailscale + host online",
 )
 
 
