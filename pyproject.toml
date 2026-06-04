@@ -10,6 +10,9 @@ dependencies = [
     "requests>=2.31",
 ]
 
+[project.scripts]
+phantom-enterprise = "code_qa.cli:main"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7",
@@ -17,13 +20,14 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["ldap_sso*", "vpn_aware_routing*", "on_prem_gitlab*", "mes_connector*", "erp_connector*", "confluence_jira*", "apple_silicon_ha*"]
+include = ["ldap_sso*", "vpn_aware_routing*", "on_prem_gitlab*", "mes_connector*", "erp_connector*", "confluence_jira*", "apple_silicon_ha*", "code_qa*"]
 
 [tool.pytest.ini_options]
 testpaths = [
     "ldap_sso/tests",
     "vpn_aware_routing/tests",
     "on_prem_gitlab/tests",
+    "code_qa/tests",
 ]
 python_files = ["test_*.py"]
 addopts = "-ra"

@@ -82,3 +82,85 @@ def list_repos(
     # Gitea search response: {"ok": bool, "data": [...]}
     data = payload.get("data") if isinstance(payload, dict) else payload
     return list(data or [])
+
+
+def list_repo_files(
+    owner: str,
+    repo: str,
+    *,
+    token: Optional[str] = None,
+    ref: Optional[str] = None,
+    base_url: str = DEFAULT_BASE_URL,
+    timeout: float = 5.0,
+) -> list[dict]:
+    """List the files in a repo's git tree (recursive) via Gitea API.
+
+    Uses ``/api/v1/repos/{owner}/{repo}/git/trees/{ref}?recursive=true``.
+
+    Returns:
+        List of tree entries (dicts with ``path``, ``type``, ``size``).
+        Only blob entries (``type == "blob"``) are real files.
+
+    Raises:
+        GiteaUnreachable: Host unreachable, timed out, or non-2xx response.
+    """
+    ref = ref or "HEAD"
+    path = f"api/v1/repos/{owner}/{repo}/git/trees/{ref}"
+    url = urljoin(base_url.rstrip("/") + "/", path)
+    headers = {"Accept": "application/json"}
+    if token:
+        headers["Authorization"] = f"token {token}"
+    try:
+        resp = requests.get(
+            url,
+            params={"recursive": "true", "per_page": 1000},
+            headers=headers,
+            timeout=timeout,
+        )
+    except requests.RequestException as exc:
+        raise GiteaUnreachable(f"{base_url}: {exc}") from exc
+    if not resp.ok:
+        raise GiteaUnreachable(
+            f"{base_url}: HTTP {resp.status_code} {resp.reason}"
+        )
+    try:
+        payload = resp.json()
+    except ValueError as exc:
+        raise GiteaUnreachable(f"{base_url}: non-JSON response") from exc
+    tree = payload.get("tree") if isinstance(payload, dict) else payload
+    return [e for e in (tree or []) if isinstance(e, dict)]
+
+
+def get_repo_file(
+    owner: str,
+    repo: str,
+    filepath: str,
+    *,
+    token: Optional[str] = None,
+    ref: Optional[str] = None,
+    base_url: str = DEFAULT_BASE_URL,
+    timeout: float = 5.0,
+) -> str:
+    """Fetch the decoded text content of a single file via Gitea API.
+
+    Uses ``/api/v1/repos/{owner}/{repo}/raw/{filepath}`` which returns the
+    raw bytes directly (no base64 round-trip).
+
+    Raises:
+        GiteaUnreachable: Host unreachable, timed out, or non-2xx response.
+    """
+    path = f"api/v1/repos/{owner}/{repo}/raw/{filepath.lstrip('/')}"
+    url = urljoin(base_url.rstrip("/") + "/", path)
+    headers: dict = {}
+    if token:
+        headers["Authorization"] = f"token {token}"
+    params = {"ref": ref} if ref else {}
+    try:
+        resp = requests.get(url, params=params, headers=headers, timeout=timeout)
+    except requests.RequestException as exc:
+        raise GiteaUnreachable(f"{base_url}: {exc}") from exc
+    if not resp.ok:
+        raise GiteaUnreachable(
+            f"{base_url}: HTTP {resp.status_code} {resp.reason}"
+        )
+    return resp.text
