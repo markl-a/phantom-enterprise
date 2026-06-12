@@ -35,7 +35,8 @@ def _tailscale_status_json() -> Optional[dict]:
         out = subprocess.run(
             ["tailscale", "status", "--json"],
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=5,
             check=False,
         )
