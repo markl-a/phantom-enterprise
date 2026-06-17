@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from apple_silicon_ha.probes import ProbeResult
-from code_qa.cli import build_parser, main
+from code_qa.cli import _pkg_version, build_parser, main
 from code_qa.status import (
     check_auth,
     check_git,
@@ -182,3 +184,41 @@ def test_cli_status_json_output_is_hermetic(monkeypatch, capsys):
 
     assert exit_code == 1
     assert json.loads(capsys.readouterr().out) == expected
+
+
+def test_cli_parser_version_flag(capsys):
+    parser = build_parser()
+
+    with pytest.raises(SystemExit) as excinfo:
+        parser.parse_args(["--version"])
+
+    assert excinfo.value.code == 0
+    assert capsys.readouterr().out.startswith("phantom-enterprise ")
+
+
+def test_pkg_version_returns_non_empty_string():
+    assert _pkg_version()
+
+
+def test_cli_status_human_output_is_hermetic(monkeypatch, capsys):
+    expected = {
+        "healthy": False,
+        "checks": [
+            {"name": "tailscale", "ok": True, "detail": "1 tailnet node(s)"},
+            {"name": "git", "ok": False, "detail": "host down"},
+        ],
+    }
+
+    def fake_gather_status(*, base_url=None):
+        assert base_url is None
+        return expected
+
+    monkeypatch.setattr("code_qa.status.gather_status", fake_gather_status)
+
+    exit_code = main(["status"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "overall: DEGRADED" in output
+    assert "[OK] tailscale: 1 tailnet node(s)" in output
+    assert "[--] git: host down" in output

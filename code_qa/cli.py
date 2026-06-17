@@ -7,9 +7,17 @@ Subcommands:
 from __future__ import annotations
 
 import argparse
+import importlib.metadata
 import json
 import sys
 from typing import Optional, Sequence
+
+
+def _pkg_version() -> str:
+    try:
+        return importlib.metadata.version("phantom-enterprise")
+    except importlib.metadata.PackageNotFoundError:
+        return "0.1.0"
 
 
 def _cmd_ask(args: argparse.Namespace) -> int:
@@ -92,6 +100,11 @@ def build_parser() -> argparse.ArgumentParser:
         prog="phantom-enterprise",
         description="Enterprise connectors + AI for your PRIVATE code.",
     )
+    p.add_argument(
+        "--version",
+        action="version",
+        version=f"phantom-enterprise {_pkg_version()}",
+    )
     sub = p.add_subparsers(dest="command", required=True)
 
     a = sub.add_parser(
@@ -144,8 +157,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = build_parser()
-    args = parser.parse_args(argv)
-    return args.func(args)
+    try:
+        args = parser.parse_args(argv)
+        return args.func(args)
+    except KeyboardInterrupt:
+        print("aborted.", file=sys.stderr)
+        return 130
+    except BrokenPipeError:
+        return 0
 
 
 if __name__ == "__main__":
