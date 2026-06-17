@@ -101,13 +101,32 @@ def tailscale_route(node_hostname: str) -> Optional[str]:
     if not target:
         return None
 
-    for peer in list_peers():
+    # Query the tailnet once; both passes below reuse the same snapshot so a
+    # miss does not shell out to ``tailscale status --json`` twice.
+    peers = list_peers()
+
+    for peer in peers:
         if peer.hostname == target:
             return peer.ip
 
-    # Loose suffix match for MagicDNS-style queries
-    for peer in list_peers():
-        if peer.hostname.startswith(target) or target in peer.hostname:
+    # MagicDNS-style FQDN query (``z13.tailnet.ts.net``): match its first label
+    # against the short hostname — but ONLY when the FQDN's suffix is the trusted
+    # Tailscale MagicDNS domain. Tailnet MagicDNS names always live under
+    # ``*.ts.net``; an attacker-controlled FQDN that merely borrows a real peer's
+    # short label (e.g. ``z13.evil.com``) must NOT resolve to that peer's IP, or
+    # we would route traffic destined for the attacker's host straight at the
+    # trusted peer.
+    name, sep, domain = target.partition(".")
+    if sep and domain.endswith(".ts.net"):
+        for peer in peers:
+            if peer.hostname and peer.hostname == name:
+                return peer.ip
+
+    # Loose partial match for abbreviated queries.
+    for peer in peers:
+        if peer.hostname and (
+            peer.hostname.startswith(target) or target in peer.hostname
+        ):
             return peer.ip
 
     return None
