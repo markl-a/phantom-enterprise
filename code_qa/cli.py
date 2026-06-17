@@ -7,8 +7,17 @@ Subcommands:
 from __future__ import annotations
 
 import argparse
+import importlib.metadata
+import json
 import sys
 from typing import Optional, Sequence
+
+
+def _pkg_version() -> str:
+    try:
+        return importlib.metadata.version("phantom-enterprise")
+    except importlib.metadata.PackageNotFoundError:
+        return "0.1.0"
 
 
 def _cmd_ask(args: argparse.Namespace) -> int:
@@ -67,10 +76,38 @@ def _cmd_ask(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_status(args: argparse.Namespace) -> int:
+    """Run HA-readiness checks and print a CLI-friendly summary."""
+
+    from . import status
+
+    result = status.gather_status(
+        base_url=args.base_url,
+        backend=status.resolve_auth_backend(),
+        ha_checks=status.gather_ha_checks(),
+    )
+
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        for check in result["checks"]:
+            marker = "[OK]" if check["ok"] else "[--]"
+            print(f"{marker} {check['name']}: {check['detail']}")
+        overall = "healthy" if result["healthy"] else "DEGRADED"
+        print(f"overall: {overall}")
+
+    return 0 if result["healthy"] else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="phantom-enterprise",
         description="Enterprise connectors + AI for your PRIVATE code.",
+    )
+    p.add_argument(
+        "--version",
+        action="version",
+        version=f"phantom-enterprise {_pkg_version()}",
     )
     sub = p.add_subparsers(dest="command", required=True)
 
@@ -103,13 +140,35 @@ def build_parser() -> argparse.ArgumentParser:
         help="Force Gitea mode even if --repo looks like a path.",
     )
     a.set_defaults(func=_cmd_ask)
+
+    s = sub.add_parser(
+        "status",
+        help="Run HA-readiness checks for enterprise dependencies.",
+    )
+    s.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable status JSON.",
+    )
+    s.add_argument(
+        "--base-url",
+        default=None,
+        help="Override Gitea base URL for the Git readiness check.",
+    )
+    s.set_defaults(func=_cmd_status)
     return p
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = build_parser()
-    args = parser.parse_args(argv)
-    return args.func(args)
+    try:
+        args = parser.parse_args(argv)
+        return args.func(args)
+    except KeyboardInterrupt:
+        print("aborted.", file=sys.stderr)
+        return 130
+    except BrokenPipeError:
+        return 0
 
 
 if __name__ == "__main__":

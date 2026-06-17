@@ -28,6 +28,7 @@ testpaths = [
     "vpn_aware_routing/tests",
     "on_prem_gitlab/tests",
     "code_qa/tests",
+    "apple_silicon_ha/tests",
 ]
 python_files = ["test_*.py"]
 addopts = "-ra"
