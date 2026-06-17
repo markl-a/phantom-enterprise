@@ -2,11 +2,45 @@
 
 from __future__ import annotations
 
+import os
 from typing import Callable, Optional
 
-from apple_silicon_ha.probes import ProbeResult, run_all
-from ldap_sso.auth import AuthBackend
+from apple_silicon_ha.probes import ProbeResult, check_peer_reachable, run_all
+from ldap_sso.auth import AuthBackend, LdapAuth
 from on_prem_gitlab import GiteaUnreachable
+
+
+def resolve_auth_backend() -> Optional[AuthBackend]:
+    """Build the configured SSO backend from the environment, or None.
+
+    If the env var LDAP_SERVER_URI is set (non-empty), return
+    LdapAuth(server_uri=that value); otherwise return None (no backend
+    configured yet, so the existing default "pending" detail then applies).
+    """
+
+    server_uri = os.environ.get("LDAP_SERVER_URI", "")
+    if server_uri:
+        return LdapAuth(server_uri=server_uri)
+    return None
+
+
+def gather_ha_checks() -> Optional[list[ProbeResult]]:
+    """Collect Apple Silicon HA probe results from configuration, or None.
+
+    If the env var PHANTOM_HA_PEERS is set (comma-separated hostnames), run
+    check_peer_reachable(host) for each non-empty hostname and return the list
+    of ProbeResult; otherwise return None (HA not configured).
+    """
+
+    hosts = [
+        host.strip()
+        for host in os.environ.get("PHANTOM_HA_PEERS", "").split(",")
+        if host.strip()
+    ]
+    if not hosts:
+        return None
+
+    return [check_peer_reachable(host) for host in hosts]
 
 
 def check_tailscale(*, router: Optional[Callable[[], list[object]]] = None) -> ProbeResult:

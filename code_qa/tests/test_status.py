@@ -174,16 +174,43 @@ def test_cli_status_json_output_is_hermetic(monkeypatch, capsys):
         ],
     }
 
-    def fake_gather_status(*, base_url=None):
+    def fake_gather_status(*, base_url=None, backend=None, ha_checks=None):
         assert base_url is None
+        assert backend is None
+        assert ha_checks is None
         return expected
 
+    monkeypatch.setattr("code_qa.status.resolve_auth_backend", lambda: None)
+    monkeypatch.setattr("code_qa.status.gather_ha_checks", lambda: None)
     monkeypatch.setattr("code_qa.status.gather_status", fake_gather_status)
 
     exit_code = main(["status", "--json"])
 
     assert exit_code == 1
     assert json.loads(capsys.readouterr().out) == expected
+
+
+def test_cli_status_healthy_environment_is_not_degraded(monkeypatch, capsys):
+    monkeypatch.setattr("code_qa.status.resolve_auth_backend", lambda: LdapAuth())
+    monkeypatch.setattr(
+        "code_qa.status.gather_ha_checks",
+        lambda: [ProbeResult(name="primary", ok=True, detail="ok")],
+    )
+    monkeypatch.setattr(
+        "code_qa.status.check_tailscale",
+        lambda **_: ProbeResult(name="tailscale", ok=True, detail="1 tailnet node(s)"),
+    )
+    monkeypatch.setattr(
+        "code_qa.status.check_git",
+        lambda **_: ProbeResult(name="git", ok=True, detail="2 repo(s)"),
+    )
+
+    exit_code = main(["status"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "overall: healthy" in output
+    assert "DEGRADED" not in output
 
 
 def test_cli_parser_version_flag(capsys):
@@ -209,10 +236,14 @@ def test_cli_status_human_output_is_hermetic(monkeypatch, capsys):
         ],
     }
 
-    def fake_gather_status(*, base_url=None):
+    def fake_gather_status(*, base_url=None, backend=None, ha_checks=None):
         assert base_url is None
+        assert backend is None
+        assert ha_checks is None
         return expected
 
+    monkeypatch.setattr("code_qa.status.resolve_auth_backend", lambda: None)
+    monkeypatch.setattr("code_qa.status.gather_ha_checks", lambda: None)
     monkeypatch.setattr("code_qa.status.gather_status", fake_gather_status)
 
     exit_code = main(["status"])

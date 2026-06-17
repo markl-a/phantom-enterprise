@@ -81,7 +81,11 @@ def _cmd_status(args: argparse.Namespace) -> int:
 
     from . import status
 
-    result = status.gather_status(base_url=args.base_url)
+    result = status.gather_status(
+        base_url=args.base_url,
+        backend=status.resolve_auth_backend(),
+        ha_checks=status.gather_ha_checks(),
+    )
 
     if args.json:
         print(json.dumps(result, indent=2))
