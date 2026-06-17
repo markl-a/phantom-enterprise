@@ -79,6 +79,23 @@ def test_route_loose_suffix_match(monkeypatch):
     assert tailscale_route("z13.tailnet.ts.net") == "100.64.0.13"
 
 
+def test_route_fqdn_first_label_only_matches_trusted_tailnet_domain(monkeypatch):
+    """A FQDN whose suffix is NOT the trusted tailnet domain must NOT resolve.
+
+    Regression guard: the MagicDNS first-label match used to compare the first
+    label of *any* FQDN against a peer's short hostname, so an attacker-controlled
+    domain like ``z13.evil.com`` would resolve to the trusted peer ``z13``'s
+    tailnet IP — routing traffic meant for the attacker's host straight at the
+    real peer. The first-label shortcut must be anchored to ``*.ts.net``.
+    """
+    _patch_status(monkeypatch, SAMPLE_STATUS)
+    # Attacker-controlled suffix borrowing a real peer's short name -> no route.
+    assert tailscale_route("z13.evil.com") is None
+    assert tailscale_route("yoyogood.attacker.net") is None
+    # Sanity: the legitimate MagicDNS FQDN for the same peer still resolves.
+    assert tailscale_route("z13.tailnet.ts.net") == "100.64.0.13"
+
+
 def test_route_unknown_and_empty_return_none(monkeypatch):
     _patch_status(monkeypatch, SAMPLE_STATUS)
     assert tailscale_route("no-such-host") is None
