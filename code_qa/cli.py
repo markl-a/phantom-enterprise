@@ -7,6 +7,7 @@ Subcommands:
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from typing import Optional, Sequence
 
@@ -67,6 +68,25 @@ def _cmd_ask(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_status(args: argparse.Namespace) -> int:
+    """Run HA-readiness checks and print a CLI-friendly summary."""
+
+    from . import status
+
+    result = status.gather_status(base_url=args.base_url)
+
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        for check in result["checks"]:
+            marker = "[OK]" if check["ok"] else "[--]"
+            print(f"{marker} {check['name']}: {check['detail']}")
+        overall = "healthy" if result["healthy"] else "DEGRADED"
+        print(f"overall: {overall}")
+
+    return 0 if result["healthy"] else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="phantom-enterprise",
@@ -103,6 +123,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Force Gitea mode even if --repo looks like a path.",
     )
     a.set_defaults(func=_cmd_ask)
+
+    s = sub.add_parser(
+        "status",
+        help="Run HA-readiness checks for enterprise dependencies.",
+    )
+    s.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable status JSON.",
+    )
+    s.add_argument(
+        "--base-url",
+        default=None,
+        help="Override Gitea base URL for the Git readiness check.",
+    )
+    s.set_defaults(func=_cmd_status)
     return p
 
 
