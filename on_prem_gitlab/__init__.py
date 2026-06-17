@@ -7,6 +7,7 @@ from .connector import (
     GiteaUnreachable,
     DEFAULT_BASE_URL,
 )
+from .gitlab import GitLabUnreachable, get_project_file, list_project_files, list_projects
 
 __all__ = [
     "list_repos",
@@ -14,4 +15,8 @@ __all__ = [
     "get_repo_file",
     "GiteaUnreachable",
     "DEFAULT_BASE_URL",
+    "GitLabUnreachable",
+    "list_projects",
+    "list_project_files",
+    "get_project_file",
 ]
