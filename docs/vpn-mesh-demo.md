@@ -39,11 +39,11 @@ For self-hosted GitLab connector checks, the lower-level module uses:
 
 ```bash
 export GITLAB_BASE_URL="http://<tailnet-host-or-ip>"
-export GITLAB_TOKEN="<optional-token>"
+# The token is passed explicitly (e.g. via --token / token=); there is no GITLAB_TOKEN env var.
 ```
 
-The `ask` CLI path is currently Gitea-oriented. Use `--gitea-base-url`,
-`--token`, and `--force-gitea` when demonstrating a repo addressed as
+The `ask` CLI path is currently Gitea-oriented. Use `--base-url`,
+`--token`, and `--gitea` when demonstrating a repo addressed as
 `owner/repo`.
 
 ## Step 1: Confirm Tailscale State
@@ -156,10 +156,10 @@ Use a Gitea-style `owner/repo` reference:
 ```bash
 phantom-enterprise ask \
   --repo owner/repo \
-  --question "Summarize the project structure" \
-  --gitea-base-url "$GITEA_BASE_URL" \
+  "Summarize the project structure" \
+  --base-url "$GITEA_BASE_URL" \
   --token "$GITEA_TOKEN" \
-  --force-gitea
+  --gitea
 ```
 
 For public repos, omit the token:
@@ -167,9 +167,9 @@ For public repos, omit the token:
 ```bash
 phantom-enterprise ask \
   --repo owner/repo \
-  --question "What are the main modules?" \
-  --gitea-base-url "$GITEA_BASE_URL" \
-  --force-gitea
+  "What are the main modules?" \
+  --base-url "$GITEA_BASE_URL" \
+  --gitea
 ```
 
 Expected result:
