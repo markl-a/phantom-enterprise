@@ -42,3 +42,24 @@ def test_build_user_filter_requires_user_placeholder() -> None:
 
 def test_escape_dn_value_escapes_special_chars() -> None:
     assert escape_dn_value("Smith, Alice+Ops\\QA") == "Smith\\, Alice\\+Ops\\\\QA"
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        ("\x00", "\\00"),
+        ("\x1f", "\\1f"),
+        ("\x7f", "\\7f"),
+    ],
+)
+def test_escape_dn_value_escapes_control_chars_as_hex(
+    value: str, expected: str
+) -> None:
+    assert escape_dn_value(value) == expected
+
+
+def test_escape_dn_value_escapes_embedded_null_byte() -> None:
+    escaped = escape_dn_value("admin\x00,dc=evil")
+
+    assert escaped == "admin\\00\\,dc\\=evil"
+    assert "\x00" not in escaped

@@ -44,6 +44,8 @@ def escape_dn_value(value: str) -> str:
             escaped.append("\\#")
         elif char == " " and (index == 0 or index == last_index):
             escaped.append("\\ ")
+        elif ord(char) < 0x20 or ord(char) == 0x7F:
+            escaped.append(f"\\{ord(char):02x}")
         else:
             escaped.append(char)
 
