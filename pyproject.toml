@@ -27,6 +27,7 @@ testpaths = [
     "ldap_sso/tests",
     "vpn_aware_routing/tests",
     "on_prem_gitlab/tests",
+    "confluence_jira/tests",
     "code_qa/tests",
     "apple_silicon_ha/tests",
 ]
