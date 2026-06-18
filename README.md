@@ -6,9 +6,11 @@
 > MES/ERP、Confluence/Jira、on-prem GitLab/Gitea、Apple Silicon HA;招聘對齊
 > 鼎新 / 中信 / 鴻海 / 聯發科等台廠 enterprise 棧。
 
-![status: alpha · scaffold (2/7 connectors live)](https://img.shields.io/badge/status-alpha%20%C2%B7%20scaffold%20(2%2F7%20live)-orange)
 ![license: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)
 [![phantom-mesh ecosystem](https://img.shields.io/badge/ecosystem-phantom--mesh-purple)](https://github.com/markl-a/phantom-mesh)
+
+> **Status:** see **[ROADMAP.md](ROADMAP.md)**. Docs map:
+> **[docs/INDEX.md](docs/INDEX.md)**.
 
 ## 30-second demo
 
@@ -24,20 +26,11 @@ cat docs/demo.cast | jq -r '.[] | select(.[1]=="o") | .[2]'
 
 Self-hosted on purpose — no upload to asciinema.org, no third-party tracking.
 
-## Status — honest disclosure
+## Status
 
-**SCAFFOLD — awaiting first enterprise customer.**
-
-This is the **7th and intentionally lowest-priority** project in the
-phantom-mesh sibling set (scheduled M4 W13-14, ~2026-08). Building 7
-connectors against zero real ERP/MES/AD instances guarantees 7 untested
-mocks. **Only 2 modules have working code today**; the other 5 are
-placeholders that activate **once a real customer (or employing company)
-defines the target system**.
-
-This is by design — the architecture is proven to extend cleanly to
-enterprise needs, while avoiding fake "demo against a Docker stub"
-implementations that don't survive contact with a real corp AD.
+See **[ROADMAP.md](ROADMAP.md)** — the single source of truth for what is
+shipped / in progress / planned, plus the demand-gated activation triggers that
+govern when each connector graduates from scaffold to production.
 
 ## 一句話 niche
 
@@ -48,15 +41,18 @@ router 直接是一等公民,不是 marketplace 上的第三方 plugin。
 
 ## The 7 connector modules
 
-| Module | Status | First validation target |
-|---|---|---|
-| `ldap_sso/` | interface stubs (LDAP/SAML/OIDC ABC) | 真實 corp AD / SAML IdP |
-| `vpn_aware_routing/` | **✅ working** (live Tailscale) | already deployed |
-| `on_prem_gitlab/` | **✅ working** (live Gitea on z13) | self-hosted Gitea over Tailscale |
-| `mes_connector/` | placeholder README | 鴻海 / 南亞科 MES API |
-| `erp_connector/` | placeholder README | 鼎新 T100 / B2 / Workflow ERP |
-| `confluence_jira/` | placeholder README | corp Atlassian instance |
-| `apple_silicon_ha/` | runbook in `docs/` | this MBA + future M-series cluster |
+| Module | First validation target |
+|---|---|
+| `ldap_sso/` | 真實 corp AD / SAML IdP |
+| `vpn_aware_routing/` | live Tailscale tailnet |
+| `on_prem_gitlab/` | self-hosted Gitea / GitLab over Tailscale |
+| `mes_connector/` | 鴻海 / 南亞科 MES API |
+| `erp_connector/` | 鼎新 T100 / B2 / Workflow ERP |
+| `confluence_jira/` | corp Atlassian instance |
+| `apple_silicon_ha/` | this MBA + future M-series cluster |
+
+Which modules have working code today vs. are still placeholders is tracked in
+**[ROADMAP.md](ROADMAP.md)**, not here.
 
 ## 30-second quickstart
 
@@ -67,14 +63,11 @@ pip install pytest requests
 pytest -v
 ```
 
-What actually runs today:
-
-- `vpn_aware_routing.router.tailscale_route('z13')` → 真實 IP 從
-  `tailscale status --json` 抓
-- `on_prem_gitlab.connector.list_repos()` → 打 `GITEA_BASE_URL`(預設 placeholder,
-  作者設成自架 Gitea over Tailscale)
-- `ldap_sso.auth.*` → 3 ABC subclasses,全部 `NotImplementedError`(shape
-  proven, impl deferred 到有真實 AD 可測時)
+The hermetic test suite runs offline; live connectors degrade gracefully when
+Tailscale or an on-prem host is absent. The CLI entrypoint is
+`phantom-enterprise` (`code_qa.cli`) — try `phantom-enterprise status` and
+`phantom-enterprise ask`. For exactly which modules have working code today vs.
+remain placeholders, see **[ROADMAP.md](ROADMAP.md)**.
 
 ## Architecture (within phantom-mesh ecosystem)
 
@@ -106,22 +99,18 @@ Pillars served: **P1** (跨平台 — enterprise on-prem extension)、**P4**(加
 這個 repo 證明 phantom-mesh 架構可乾淨延伸到企業需求。
 
 - **Recruiters**: 看的是「會做 enterprise integration、懂 LDAP/SAML/OIDC、
-  懂台廠 MES/ERP 真實 schema、懂 on-prem first 思維」— 即使 5/7 還是 stub,
-  接口形狀 + Apple Silicon HA runbook + 真實 Tailscale/Gitea integration 已
-  足以 demonstrate 能力。
+  懂台廠 MES/ERP 真實 schema、懂 on-prem first 思維」— 即使部分 connector 仍是
+  stub,接口形狀 + Apple Silicon HA runbook + 真實 Tailscale/Gitea integration
+  已足以 demonstrate 能力。(實際進度見 [ROADMAP.md](ROADMAP.md)。)
 - **Co-builders**: 任何在台廠做 internal tool / AI infra,想接 phantom-mesh
   跑 cross-device agent 的工程師。
 
-## Roadmap (per master plan)
+## Roadmap
 
-| When | Trigger | Work |
-|---|---|---|
-| Now (2026-05) | — | scaffold + 2 working connectors |
-| M4 W13-14 (~2026-08) | 第一個 enterprise lead OR 加入 target 公司 | 實作 `ldap_sso/` against 真實 AD/SAML |
-| Post-employment | depends on employer stack | activate MES / ERP / Confluence based on actual stack |
-| Indefinite | no demand signal | stays scaffold (acceptable outcome) |
-
-Full design at [`docs/05-phantom-enterprise.md`](docs/).
+See **[ROADMAP.md](ROADMAP.md)** for the full shipped / planned breakdown and
+the demand-gated activation triggers. Full design rationale at
+[`docs/05-phantom-enterprise.md`](docs/05-phantom-enterprise.md); browse all docs
+via [`docs/INDEX.md`](docs/INDEX.md).
 
 ## License
 

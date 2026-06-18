@@ -1,6 +1,7 @@
 # erp_connector
 
-**Status:** placeholder — no code.
+Build status is tracked in [`../ROADMAP.md`](../ROADMAP.md) (the status source
+of truth).
 
 Target: 鼎新 (DSC) T100 / B2 / Workflow ERP — the dominant Taiwan-mid-market
 ERP stack. Also Workday / SAP S/4HANA for larger customers.
