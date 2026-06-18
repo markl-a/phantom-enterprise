@@ -1,6 +1,7 @@
 # confluence_jira
 
-**Status:** placeholder — no code.
+Build status is tracked in [`../ROADMAP.md`](../ROADMAP.md) (the status source
+of truth).
 
 Target: corporate Atlassian Confluence + Jira (Cloud or Data Center).
 This is the easiest connector to validate because Atlassian has public,

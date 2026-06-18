@@ -1,6 +1,7 @@
 # mes_connector
 
-**Status:** placeholder — no code.
+Build status is tracked in [`../ROADMAP.md`](../ROADMAP.md) (the status source
+of truth).
 
 Target: 鴻海 / 南亞科 / 台積 in-house MES APIs. Schemas vary per fab and
 are NDA-locked, so this module activates only after joining a target

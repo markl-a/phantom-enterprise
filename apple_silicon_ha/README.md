@@ -1,6 +1,7 @@
 # apple_silicon_ha
 
-**Status:** placeholder module — actual runbook lives in
+Build status is tracked in [`../ROADMAP.md`](../ROADMAP.md) (the status source
+of truth). The deploy runbook lives in
 [`../docs/apple-silicon-ha-deploy.md`](../docs/apple-silicon-ha-deploy.md).
 
 The maintainer already runs phantom-mesh in HA on a personal Apple
