@@ -6,10 +6,12 @@ is stubbed so the tests are deterministic and CI-safe.
 
 import textwrap
 from pathlib import Path
+from urllib.parse import unquote
 
 import pytest
 
 import importlib
+from on_prem_gitlab import gitlab as gitlab_mod
 
 # NB: code_qa/__init__ re-exports the ``ask`` function, which shadows the
 # ``code_qa.ask`` submodule attribute. Pull the real module from sys.modules.
@@ -122,3 +124,101 @@ def test_cli_parser_ask_args():
     assert ns.command == "ask"
     assert ns.repo == "/tmp/x"
     assert ns.question == "what is this?"
+
+class GitLabResponse:
+    def __init__(
+        self,
+        payload=None,
+        *,
+        ok=True,
+        status_code=200,
+        reason="OK",
+        text="",
+    ):
+        self._payload = payload
+        self.ok = ok
+        self.status_code = status_code
+        self.reason = reason
+        self.text = text
+
+    def json(self):
+        return self._payload
+
+
+_GITLAB_TREE = [
+    {"type": "blob", "path": "src/auth.py"},
+    {"type": "blob", "path": "README.md"},
+]
+
+_GITLAB_FILES = {
+    "src/auth.py": textwrap.dedent(
+        """
+        def authenticate(token):
+            return {"Authorization": f"Bearer {token}"}
+        """
+    ),
+    "README.md": "# Canned project\n\nAuthentication details live in src/auth.py.\n",
+}
+
+
+def _fake_gitlab_get(url, *, params, headers, timeout):
+    if "repository/tree" in url:
+        return GitLabResponse(_GITLAB_TREE)
+    if "repository/files" in url and "/raw" in url:
+        encoded_path = url.split("/repository/files/", 1)[1].rsplit("/raw", 1)[0]
+        return GitLabResponse(text=_GITLAB_FILES[unquote(encoded_path)])
+    raise AssertionError(f"unexpected GitLab URL: {url}")
+
+
+def test_ask_gitlab_pulls_files_through_connector(monkeypatch):
+    captured = {}
+
+    def fake_answer(question, context, **kwargs):
+        captured["blob"] = context.as_prompt_blob()
+        return "stubbed answer citing src/auth.py"
+
+    monkeypatch.setattr(ask_mod, "answer_with_phantom", fake_answer)
+    monkeypatch.setattr(gitlab_mod.requests, "get", _fake_gitlab_get)
+
+    result = ask_mod.ask(
+        "group/proj",
+        "How does authenticate work?",
+        is_gitlab=True,
+        token="secret",
+        base_url="http://gitlab.example",
+    )
+
+    paths = [f.path for f in result.context.files]
+    assert result.context.source.startswith("on-prem GitLab")
+    assert result.context.files
+    assert "src/auth.py" in paths
+    assert "Authorization" in captured["blob"]
+
+
+def test_cli_ask_gitlab_pulls_files_through_connector(monkeypatch, capsys):
+    from code_qa.cli import main
+
+    def fake_answer(question, context, **kwargs):
+        return "stubbed answer citing src/auth.py"
+
+    monkeypatch.setattr(ask_mod, "answer_with_phantom", fake_answer)
+    monkeypatch.setattr(gitlab_mod.requests, "get", _fake_gitlab_get)
+
+    result = main(
+        [
+            "ask",
+            "--repo",
+            "group/proj",
+            "--gitlab",
+            "--base-url",
+            "http://gitlab.example",
+            "--token",
+            "secret",
+            "How does authenticate work?",
+        ]
+    )
+
+    stdout = capsys.readouterr().out
+    assert result == 0
+    assert "on-prem GitLab" in stdout
+    assert "src/auth.py" in stdout

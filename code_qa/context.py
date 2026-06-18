@@ -256,6 +256,64 @@ def build_gitea_context(
     )
 
 
+def build_gitlab_context(
+    project_id: str,
+    question: str,
+    *,
+    token: Optional[str] = None,
+    ref: Optional[str] = None,
+    base_url: Optional[str] = None,
+) -> RepoContext:
+    from on_prem_gitlab import (
+        GITLAB_DEFAULT_BASE_URL,
+        get_project_file,
+        list_project_files,
+    )
+
+    base = base_url or GITLAB_DEFAULT_BASE_URL
+    entries = list_project_files(
+        project_id, token=token, ref=ref, base_url=base
+    )
+    terms = _question_terms(question)
+
+    # Rank by path first (cheap), fetch contents only for the top slice to
+    # avoid hammering the API with one request per file.
+    blobs = [e for e in entries if e.get("type") == "blob"]
+
+    def path_pref(e: dict) -> float:
+        path = e.get("path", "")
+        s = _score(path, "", terms)
+        if Path(path).suffix.lower() in SOURCE_EXTS:
+            s += 1.0
+        return s
+
+    blobs.sort(key=path_pref, reverse=True)
+    top = blobs[: MAX_FILES * 2]  # fetch a buffer, then re-rank with content
+
+    ranked: list[tuple[float, str, str]] = []
+    for e in top:
+        path = e["path"]
+        try:
+            content = get_project_file(
+                project_id, path, token=token, ref=ref, base_url=base
+            )
+        except Exception:
+            continue
+        if "\x00" in content[:4096]:
+            continue
+        s = _score(path, content, terms)
+        if Path(path).suffix.lower() in SOURCE_EXTS:
+            s += 1.0
+        ranked.append((s, path, content))
+
+    ranked.sort(key=lambda c: c[0], reverse=True)
+    return _assemble(
+        source=f"on-prem GitLab: {project_id} @ {base}",
+        ranked=ranked,
+        considered=len(blobs),
+    )
+
+
 # --- shared assembly -------------------------------------------------------
 
 def _assemble(
