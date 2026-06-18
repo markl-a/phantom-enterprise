@@ -22,7 +22,7 @@ def _pkg_version() -> str:
 
 def _cmd_ask(args: argparse.Namespace) -> int:
     from .ask import ask
-    from on_prem_gitlab import GiteaUnreachable
+    from on_prem_gitlab import GiteaUnreachable, GitLabUnreachable
 
     try:
         result = ask(
@@ -32,7 +32,17 @@ def _cmd_ask(args: argparse.Namespace) -> int:
             ref=args.ref,
             base_url=args.base_url,
             is_gitea=args.gitea or None,
+            is_gitlab=args.gitlab or None,
         )
+    except GitLabUnreachable as exc:
+        print(
+            f"error: on-prem GitLab unreachable: {exc}\n"
+            f"hint: the reliable path is a LOCAL checkout — try:\n"
+            f"      phantom-enterprise ask --repo /path/to/your/repo "
+            f'"{args.question}"',
+            file=sys.stderr,
+        )
+        return 2
     except GiteaUnreachable as exc:
         print(
             f"error: on-prem Gitea unreachable: {exc}\n"
@@ -118,26 +128,42 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument(
         "--repo",
         required=True,
-        help="Local repo path (reliable default) OR Gitea 'owner/repo' (bonus).",
+        help=(
+            "Local repo path (reliable default), Gitea 'owner/repo' (bonus), "
+            "or GitLab project id."
+        ),
     )
     a.add_argument("question", help="Natural-language question about the codebase.")
     a.add_argument(
         "--token",
         default=None,
-        help="Gitea/GitLab personal access token (Gitea mode only).",
+        help="Personal access token (Gitea or GitLab mode).",
     )
     a.add_argument(
-        "--ref", default=None, help="Git ref/branch for Gitea mode (default HEAD)."
+        "--ref",
+        default=None,
+        help="Git ref/branch for Gitea or GitLab mode (default HEAD).",
     )
     a.add_argument(
         "--base-url",
         default=None,
-        help="Override Gitea base URL (else GITEA_BASE_URL / default).",
+        help=(
+            "Override Gitea/GitLab base URL (else "
+            "GITEA_BASE_URL/GITLAB_BASE_URL / default)."
+        ),
     )
     a.add_argument(
         "--gitea",
         action="store_true",
         help="Force Gitea mode even if --repo looks like a path.",
+    )
+    a.add_argument(
+        "--gitlab",
+        action="store_true",
+        help=(
+            "Force GitLab mode: treat --repo as a GitLab project id "
+            "('group/name' or numeric)."
+        ),
     )
     a.set_defaults(func=_cmd_ask)
 

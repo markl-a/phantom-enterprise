@@ -11,7 +11,7 @@ import subprocess
 from dataclasses import dataclass
 from typing import Optional
 
-from .context import RepoContext, build_gitea_context, build_local_context
+from .context import RepoContext, build_gitea_context, build_gitlab_context, build_local_context
 
 PROMPT_TEMPLATE = """\
 You are answering a question about a PRIVATE codebase. Use ONLY the file
@@ -81,6 +81,7 @@ def ask(
     base_url: Optional[str] = None,
     phantom_bin: str = "phantom",
     is_gitea: Optional[bool] = None,
+    is_gitlab: Optional[bool] = None,
 ) -> AskResult:
     """End-to-end: select files from ``repo`` and answer ``question``.
 
@@ -89,7 +90,7 @@ def ask(
     """
     from pathlib import Path
 
-    if is_gitea is None:
+    if not is_gitlab and is_gitea is None:
         looks_gitea = (
             "/" in repo
             and repo.count("/") == 1
@@ -97,7 +98,11 @@ def ask(
         )
         is_gitea = looks_gitea
 
-    if is_gitea:
+    if is_gitlab:
+        context = build_gitlab_context(
+            repo, question, token=token, ref=ref, base_url=base_url
+        )
+    elif is_gitea:
         owner, _, name = repo.partition("/")
         context = build_gitea_context(
             owner, name, question, token=token, ref=ref, base_url=base_url
