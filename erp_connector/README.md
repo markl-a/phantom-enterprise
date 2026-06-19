@@ -1,6 +1,6 @@
 # erp_connector
 
-Build status is tracked in [`../ROADMAP.md`](../ROADMAP.md) (the status source
+Build status is tracked in [`../docs/phantom-enterprise.md`](../docs/phantom-enterprise.md) (the status source
 of truth).
 
 Target: 鼎新 (DSC) T100 / B2 / Workflow ERP — the dominant Taiwan-mid-market

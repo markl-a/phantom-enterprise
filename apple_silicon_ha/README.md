@@ -1,6 +1,6 @@
 # apple_silicon_ha
 
-Build status is tracked in [`../ROADMAP.md`](../ROADMAP.md) (the status source
+Build status is tracked in [`../docs/phantom-enterprise.md`](../docs/phantom-enterprise.md) (the status source
 of truth). The deploy runbook lives in
 [`../docs/apple-silicon-ha-deploy.md`](../docs/apple-silicon-ha-deploy.md).
 

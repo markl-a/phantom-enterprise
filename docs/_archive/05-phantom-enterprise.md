@@ -1,3 +1,5 @@
+> ARCHIVED 2026-06-19 — 內容已併入 docs/phantom-enterprise.md;此為歷史版本。
+
 # ⑤ phantom-enterprise
 
 > **phantom-mesh 接企業 on-prem 環境(LDAP/SSO/MES/ERP/VPN/Confluence)的 connector pack**

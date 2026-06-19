@@ -1,6 +1,6 @@
 # mes_connector
 
-Build status is tracked in [`../ROADMAP.md`](../ROADMAP.md) (the status source
+Build status is tracked in [`../docs/phantom-enterprise.md`](../docs/phantom-enterprise.md) (the status source
 of truth).
 
 Target: 鴻海 / 南亞科 / 台積 in-house MES APIs. Schemas vary per fab and

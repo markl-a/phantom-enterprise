@@ -1,6 +1,6 @@
 # confluence_jira
 
-Build status is tracked in [`../ROADMAP.md`](../ROADMAP.md) (the status source
+Build status is tracked in [`../docs/phantom-enterprise.md`](../docs/phantom-enterprise.md) (the status source
 of truth).
 
 Target: corporate Atlassian Confluence + Jira (Cloud or Data Center).
