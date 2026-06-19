@@ -1,9 +1,15 @@
 """Live Gitea connector tests (skip gracefully if z13 unreachable)."""
 
+import os
+
 import pytest
 import requests
 
 from on_prem_gitlab.connector import DEFAULT_BASE_URL, GiteaUnreachable, list_repos
+
+
+def _live_enabled() -> bool:
+    return os.environ.get("PHANTOM_ENTERPRISE_LIVE") == "1"
 
 
 def _z13_reachable() -> bool:
@@ -17,10 +23,13 @@ def _z13_reachable() -> bool:
         return False
 
 
-pytestmark = pytest.mark.skipif(
-    not _z13_reachable(),
-    reason="on-prem Gitea (set GITEA_BASE_URL) not reachable — needs live Tailscale + host online",
-)
+pytestmark = [
+    pytest.mark.live,
+    pytest.mark.skipif(
+        not _live_enabled() or not _z13_reachable(),
+        reason="set PHANTOM_ENTERPRISE_LIVE=1 with reachable GITEA_BASE_URL to run live Gitea tests",
+    ),
+]
 
 
 def test_list_repos_returns_list():

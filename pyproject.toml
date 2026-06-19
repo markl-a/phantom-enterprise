@@ -33,3 +33,6 @@ testpaths = [
 ]
 python_files = ["test_*.py"]
 addopts = "-ra"
+markers = [
+    "live: requires PHANTOM_ENTERPRISE_LIVE=1 and external services",
+]

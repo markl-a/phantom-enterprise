@@ -1,6 +1,7 @@
 """Live Tailscale tests (skip gracefully if CLI / tailnet not available)."""
 
 import ipaddress
+import os
 import shutil
 
 import pytest
@@ -8,10 +9,17 @@ import pytest
 from vpn_aware_routing.router import RouteResult, list_peers, tailscale_route
 
 
-pytestmark = pytest.mark.skipif(
-    shutil.which("tailscale") is None,
-    reason="tailscale CLI not installed — VPN routing tests require live tailnet",
-)
+def _live_enabled() -> bool:
+    return os.environ.get("PHANTOM_ENTERPRISE_LIVE") == "1"
+
+
+pytestmark = [
+    pytest.mark.live,
+    pytest.mark.skipif(
+        not _live_enabled() or shutil.which("tailscale") is None,
+        reason="set PHANTOM_ENTERPRISE_LIVE=1 with a live tailnet to run VPN routing tests",
+    ),
+]
 
 
 def _is_tailnet_ip(s: str) -> bool:

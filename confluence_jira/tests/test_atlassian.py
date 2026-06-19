@@ -29,10 +29,13 @@ def _atlassian_reachable() -> bool:
         return False
 
 
-pytestmark = pytest.mark.skipif(
-    not _atlassian_reachable(),
-    reason="Atlassian Cloud env not configured or instance unreachable",
-)
+pytestmark = [
+    pytest.mark.live,
+    pytest.mark.skipif(
+        os.environ.get("PHANTOM_ENTERPRISE_LIVE") != "1" or not _atlassian_reachable(),
+        reason="set PHANTOM_ENTERPRISE_LIVE=1 with Atlassian env to run live Atlassian tests",
+    ),
+]
 
 
 def test_search_pages_returns_list():
