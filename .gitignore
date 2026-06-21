@@ -57,3 +57,11 @@ secrets/
 # Logs
 *.log
 logs/
+
+# Autonomous-loop scratch (never push to public repo)
+.ai-shared/
+overnight/
+SESSION_RESUME.md
+cache/
+TASK-*.md
+configs/agents.*.toml
