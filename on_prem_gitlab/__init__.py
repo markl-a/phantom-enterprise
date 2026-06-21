@@ -1,4 +1,4 @@
-"""On-prem GitLab / Gitea connector (validated against live Gitea on z13)."""
+"""On-prem GitLab / Gitea connector (validated against a live on-prem Gitea instance)."""
 
 from .connector import (
     list_repos,

@@ -15,20 +15,20 @@ from vpn_aware_routing.router import RouteResult, list_peers, tailscale_route
 # the router actually reads).
 SAMPLE_STATUS = {
     "Self": {
-        "HostName": "MarkMacBook-Air",
+        "HostName": "mac-node",
         "TailscaleIPs": ["100.64.0.1", "fd7a::1"],
         "Online": True,
         "OS": "macOS",
     },
     "Peer": {
         "nodekey:aaa": {
-            "HostName": "z13",
+            "HostName": "win-node-a",
             "TailscaleIPs": ["100.64.0.13"],
             "Online": True,
             "OS": "linux",
         },
         "nodekey:bbb": {
-            "HostName": "yoyogood",
+            "HostName": "win-node-b",
             "TailscaleIPs": ["100.64.0.20"],
             "Online": False,
             "OS": "windows",
@@ -52,14 +52,14 @@ def test_list_peers_parses_self_and_peers(monkeypatch):
     assert all(isinstance(p, RouteResult) for p in peers)
     by_host = {p.hostname: p for p in peers}
     # hostnames are lower-cased
-    assert "markmacbook-air" in by_host
-    assert "z13" in by_host
-    assert "yoyogood" in by_host
+    assert "mac-node" in by_host
+    assert "win-node-a" in by_host
+    assert "win-node-b" in by_host
     # first TailscaleIP is taken; offline flag preserved
-    assert by_host["z13"].ip == "100.64.0.13"
-    assert by_host["z13"].online is True
-    assert by_host["yoyogood"].online is False
-    assert by_host["markmacbook-air"].os == "macOS"
+    assert by_host["win-node-a"].ip == "100.64.0.13"
+    assert by_host["win-node-a"].online is True
+    assert by_host["win-node-b"].online is False
+    assert by_host["mac-node"].os == "macOS"
 
 
 def test_list_peers_empty_when_status_unavailable(monkeypatch):
@@ -69,14 +69,14 @@ def test_list_peers_empty_when_status_unavailable(monkeypatch):
 
 def test_route_exact_match_case_insensitive(monkeypatch):
     _patch_status(monkeypatch, SAMPLE_STATUS)
-    assert tailscale_route("Z13") == "100.64.0.13"
-    assert tailscale_route("yoyogood") == "100.64.0.20"
+    assert tailscale_route("WIN-NODE-A") == "100.64.0.13"
+    assert tailscale_route("win-node-b") == "100.64.0.20"
 
 
 def test_route_loose_suffix_match(monkeypatch):
     _patch_status(monkeypatch, SAMPLE_STATUS)
     # MagicDNS-style FQDN query resolves via substring/prefix match
-    assert tailscale_route("z13.tailnet.ts.net") == "100.64.0.13"
+    assert tailscale_route("win-node-a.tailnet.ts.net") == "100.64.0.13"
 
 
 def test_route_fqdn_first_label_only_matches_trusted_tailnet_domain(monkeypatch):
@@ -84,16 +84,17 @@ def test_route_fqdn_first_label_only_matches_trusted_tailnet_domain(monkeypatch)
 
     Regression guard: the MagicDNS first-label match used to compare the first
     label of *any* FQDN against a peer's short hostname, so an attacker-controlled
-    domain like ``z13.evil.com`` would resolve to the trusted peer ``z13``'s
-    tailnet IP — routing traffic meant for the attacker's host straight at the
-    real peer. The first-label shortcut must be anchored to ``*.ts.net``.
+    domain like ``win-node-a.evil.com`` would resolve to the trusted peer
+    ``win-node-a``'s tailnet IP — routing traffic meant for the attacker's host
+    straight at the real peer. The first-label shortcut must be anchored to
+    ``*.ts.net``.
     """
     _patch_status(monkeypatch, SAMPLE_STATUS)
     # Attacker-controlled suffix borrowing a real peer's short name -> no route.
-    assert tailscale_route("z13.evil.com") is None
-    assert tailscale_route("yoyogood.attacker.net") is None
+    assert tailscale_route("win-node-a.evil.com") is None
+    assert tailscale_route("win-node-b.attacker.net") is None
     # Sanity: the legitimate MagicDNS FQDN for the same peer still resolves.
-    assert tailscale_route("z13.tailnet.ts.net") == "100.64.0.13"
+    assert tailscale_route("win-node-a.tailnet.ts.net") == "100.64.0.13"
 
 
 def test_route_unknown_and_empty_return_none(monkeypatch):

@@ -245,15 +245,15 @@ flowchart TD
 
 ### 📅 分期表(需求閘控)
 
-> 排序原則:**便宜高值先 → 護城河先 → 需整合外部系統 / 操作者決策的最後做**。寫 = codex/claude,審 ≥2 distinct-AI,高風險 → governor + 雙閘 → 手機核准。機台:z13(主・Windows)/ M5 / M1 / acer / ayaneo / Android。
+> 排序原則:**便宜高值先 → 護城河先 → 需整合外部系統 / 操作者決策的最後做**。寫 = codex/claude,審 ≥2 distinct-AI,高風險 → governor + 雙閘 → 手機核准。機台:Win 編排機(主)/ Mac 節點 ×2 / Win 節點 ×2 / Android worker。
 
 | 階段 | 目標 | 具體項 | 在哪台機 + 哪 AI | 風險 / 觸發前置 |
 |---|---|---|---|---|
-| **P0 硬化膠水** 🟢便宜高值 | 強化既有利基,零外部依賴 | ・`ask` 強制引用檢查<br/>・repo 超窗時 token 預算 + 截斷提示<br/>・文件化「資料只在本機」路徑 | z13 寫 = codex/claude;審 = opencode + agy | 純本地、無外部系統;**恆常啟用**、可立即做、可逆 |
-| **P1 真實驗證**(已建之物)🛡️護城河 | 把已是真實的連接器對真實實例跑 | ・Confluence/Jira 對真 Atlassian<br/>・GitLab 連接器對真 self-hosted | acer/ayaneo 跑連線;z13 orchestrate;審 ≥2 AI | ⚠️ **需操作者拿到真實企業實例**;無實例不啟動 |
-| **P1.5 旗艦:網站驅動 agent** 🚩主角 | 把 `ask` 從「讀一個 repo」擴大到「逛多個內網網站、跨來源湊答案」 | ・讓 agent 串接 toy Confluence/Jira/GitLab 連接器跨來源回答<br/>・(若需逛 HTML 介面)薄包裝一個瀏覽器/網頁 agent,藏在自家介面後 | z13 寫 = codex/claude;審 ≥2 AI | ⚠️ **需 P1 真實實例先就緒**;先用連接器(API)跑,瀏覽器驅動只在 API 不夠時才加(over-build 警戒) |
-| **P2 檢索升級**(痛了才做)⚙️ | 單 prompt 塞檔失效時才升級 | ・包裝 **LlamaIndex** 本地索引層(候選方向)<br/>・本地 chunk + top-k,仍走 `phantom exec` + 引用 | z13/M5 寫 = codex;審 = claude + agy | ⚠️ **只在實測 overflow 後做**;勿提前建向量 DB/embedding(over-build) |
-| **P3 IdP 啟用** 🔑需外部 | 對真 AD/IdP 實作認證 | ・`LdapAuth.authenticate`(照 `docs/ldap-activation-spec.md`)<br/>・`SamlAuth`/`OidcAuth`(照 `docs/saml-oidc-spec.md`) | z13 寫;審 ≥2 AI;高風險 → governor 強制暫停 → 手機核准 | ⚠️ **需真實目錄/IdP + 操作者決策**;保住 `AuthBackend` 契約 |
+| **P0 硬化膠水** 🟢便宜高值 | 強化既有利基,零外部依賴 | ・`ask` 強制引用檢查<br/>・repo 超窗時 token 預算 + 截斷提示<br/>・文件化「資料只在本機」路徑 | Win 編排機 寫 = codex/claude;審 = opencode + agy | 純本地、無外部系統;**恆常啟用**、可立即做、可逆 |
+| **P1 真實驗證**(已建之物)🛡️護城河 | 把已是真實的連接器對真實實例跑 | ・Confluence/Jira 對真 Atlassian<br/>・GitLab 連接器對真 self-hosted | Win 節點 跑連線;Win 編排機 orchestrate;審 ≥2 AI | ⚠️ **需操作者拿到真實企業實例**;無實例不啟動 |
+| **P1.5 旗艦:網站驅動 agent** 🚩主角 | 把 `ask` 從「讀一個 repo」擴大到「逛多個內網網站、跨來源湊答案」 | ・讓 agent 串接 toy Confluence/Jira/GitLab 連接器跨來源回答<br/>・(若需逛 HTML 介面)薄包裝一個瀏覽器/網頁 agent,藏在自家介面後 | Win 編排機 寫 = codex/claude;審 ≥2 AI | ⚠️ **需 P1 真實實例先就緒**;先用連接器(API)跑,瀏覽器驅動只在 API 不夠時才加(over-build 警戒) |
+| **P2 檢索升級**(痛了才做)⚙️ | 單 prompt 塞檔失效時才升級 | ・包裝 **LlamaIndex** 本地索引層(候選方向)<br/>・本地 chunk + top-k,仍走 `phantom exec` + 引用 | Win 編排機/Mac 節點 寫 = codex;審 = claude + agy | ⚠️ **只在實測 overflow 後做**;勿提前建向量 DB/embedding(over-build) |
+| **P3 IdP 啟用** 🔑需外部 | 對真 AD/IdP 實作認證 | ・`LdapAuth.authenticate`(照 `docs/ldap-activation-spec.md`)<br/>・`SamlAuth`/`OidcAuth`(照 `docs/saml-oidc-spec.md`) | Win 編排機 寫;審 ≥2 AI;高風險 → governor 強制暫停 → 手機核准 | ⚠️ **需真實目錄/IdP + 操作者決策**;保住 `AuthBackend` 契約 |
 | **P4 NDA 連接器** 🔭最後 | MES/ERP 僅在 NDA/客戶內 | ・MES(鴻海/南亞科 schema)<br/>・ERP(鼎新 T100 唯讀先) | 進大廠後該公司環境;審 ≥2 AI | ⚠️ **schema NDA 鎖、需操作者就職/客戶**(M4 W13-14 ~2026-08);對零實例寫 = 禁 |
 
 > 此外:**WireGuard / OpenVPN 後援路由**(P4.2)延後 —— Tailscale 是唯一已示範的 VPN-aware 路徑(觸發:live WireGuard/OpenVPN infra)。**Apple Silicon HA 升級為真實 failover** 需第二台 M 系列節點。

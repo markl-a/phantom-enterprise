@@ -86,14 +86,14 @@ apple-silicon-ha 探針)、1 個刻意介面縫(ldap-sso)、2 個 0-LOC 佔位
 
 > 排序原則(依單人多機開發模型):**便宜高值先 → 護城河先 → 需整合外部系統/
 > 操作者決策的最後做**。寫=codex/claude,審≥2 distinct-AI,governor+雙閘→手機。
-> 機台:z13(主・Windows)/ M5 / M1 / acer / ayaneo / Android。
+> 機台:Win 編排機(主)/ Mac 節點 ×2 / Win 節點 ×2 / Android worker。
 
 | 階段 | 目標 | 具體項(2–4) | 在哪台機 + 哪 AI | 風險前置 |
 |---|---|---|---|---|
-| **P0 硬化膠水** 🟢便宜高值 | 強化既有利基,零外部依賴 | ・`ask` 強制引用檢查<br/>・repo 超窗時 token 預算+截斷提示<br/>・文件化「資料只在本機」路徑 | z13 寫=codex/claude;審=opencode+agy | 純本地、無外部系統;可立即做、可逆 |
-| **P1 真實驗證**(已建之物)🛡️護城河 | 把已是真實的連接器對真實實例跑 | ・Confluence/Jira 對真 Atlassian<br/>・GitLab 連接器對真 self-hosted | acer/ayaneo 跑連線;z13 orchestrate;審≥2 AI | ⚠️ **需操作者拿到真實企業實例**(觸發見英文 ROADMAP);無實例不啟動 |
-| **P2 檢索升級**(痛了才做)⚙️ | 單 prompt 塞檔失效時才升級 | ・包裝 **LlamaIndex** 本地索引層(候選方向)<br/>・本地 chunk + top-k,仍走 `phantom exec` + 引用 | z13/M5 寫=codex;審=claude+agy | ⚠️ **只在實測 overflow 後做**;勿提前建向量 DB/embedding(over-build) |
-| **P3 IdP 啟用** 🔑需外部 | 對真 AD/IdP 實作認證 | ・`LdapAuth.authenticate`(照 `docs/ldap-activation-spec.md`)<br/>・`SamlAuth`/`OidcAuth`(照 `docs/saml-oidc-spec.md`) | z13 寫;審≥2 AI;高風險→governor 強制暫停→手機核准 | ⚠️ **需真實目錄/IdP + 操作者決策**;保住 `AuthBackend` 契約 |
+| **P0 硬化膠水** 🟢便宜高值 | 強化既有利基,零外部依賴 | ・`ask` 強制引用檢查<br/>・repo 超窗時 token 預算+截斷提示<br/>・文件化「資料只在本機」路徑 | Win 編排機 寫=codex/claude;審=opencode+agy | 純本地、無外部系統;可立即做、可逆 |
+| **P1 真實驗證**(已建之物)🛡️護城河 | 把已是真實的連接器對真實實例跑 | ・Confluence/Jira 對真 Atlassian<br/>・GitLab 連接器對真 self-hosted | Win 節點 跑連線;Win 編排機 orchestrate;審≥2 AI | ⚠️ **需操作者拿到真實企業實例**(觸發見英文 ROADMAP);無實例不啟動 |
+| **P2 檢索升級**(痛了才做)⚙️ | 單 prompt 塞檔失效時才升級 | ・包裝 **LlamaIndex** 本地索引層(候選方向)<br/>・本地 chunk + top-k,仍走 `phantom exec` + 引用 | Win 編排機/Mac 節點 寫=codex;審=claude+agy | ⚠️ **只在實測 overflow 後做**;勿提前建向量 DB/embedding(over-build) |
+| **P3 IdP 啟用** 🔑需外部 | 對真 AD/IdP 實作認證 | ・`LdapAuth.authenticate`(照 `docs/ldap-activation-spec.md`)<br/>・`SamlAuth`/`OidcAuth`(照 `docs/saml-oidc-spec.md`) | Win 編排機 寫;審≥2 AI;高風險→governor 強制暫停→手機核准 | ⚠️ **需真實目錄/IdP + 操作者決策**;保住 `AuthBackend` 契約 |
 | **P4 NDA 連接器** 🔭最後 | MES/ERP 僅在 NDA/客戶內 | ・MES(鴻海/南亞科 schema)<br/>・ERP(鼎新 T100 唯讀先) | 進大廠後該公司環境;審≥2 AI | ⚠️ **schema NDA 鎖、需操作者就職/客戶**;對零實例寫=禁 |
 
 ---

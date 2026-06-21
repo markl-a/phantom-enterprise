@@ -1,4 +1,4 @@
-"""Live Gitea connector tests (skip gracefully if z13 unreachable)."""
+"""Live Gitea connector tests (skip gracefully if the on-prem host is unreachable)."""
 
 import os
 
@@ -12,7 +12,7 @@ def _live_enabled() -> bool:
     return os.environ.get("PHANTOM_ENTERPRISE_LIVE") == "1"
 
 
-def _z13_reachable() -> bool:
+def _gitea_reachable() -> bool:
     try:
         r = requests.get(
             f"{DEFAULT_BASE_URL}/api/v1/version",
@@ -26,7 +26,7 @@ def _z13_reachable() -> bool:
 pytestmark = [
     pytest.mark.live,
     pytest.mark.skipif(
-        not _live_enabled() or not _z13_reachable(),
+        not _live_enabled() or not _gitea_reachable(),
         reason="set PHANTOM_ENTERPRISE_LIVE=1 with reachable GITEA_BASE_URL to run live Gitea tests",
     ),
 ]

@@ -91,8 +91,8 @@ def tailscale_route(node_hostname: str) -> Optional[str]:
     (not the full MagicDNS FQDN).
 
     Args:
-        node_hostname: Short hostname, e.g. ``"yoyogood"``, ``"z13"``,
-            ``"markmacbook-air"``.
+        node_hostname: Short hostname, e.g. ``"win-node-a"``, ``"win-node-b"``,
+            ``"mac-node"``.
 
     Returns:
         IPv4 string (e.g. ``"100.x.y.z"``) or None.
@@ -109,11 +109,11 @@ def tailscale_route(node_hostname: str) -> Optional[str]:
         if peer.hostname == target:
             return peer.ip
 
-    # MagicDNS-style FQDN query (``z13.tailnet.ts.net``): match its first label
+    # MagicDNS-style FQDN query (``win-node-a.tailnet.ts.net``): match its first label
     # against the short hostname — but ONLY when the FQDN's suffix is the trusted
     # Tailscale MagicDNS domain. Tailnet MagicDNS names always live under
     # ``*.ts.net``; an attacker-controlled FQDN that merely borrows a real peer's
-    # short label (e.g. ``z13.evil.com``) must NOT resolve to that peer's IP, or
+    # short label (e.g. ``win-node-a.evil.com``) must NOT resolve to that peer's IP, or
     # we would route traffic destined for the attacker's host straight at the
     # trusted peer.
     name, sep, domain = target.partition(".")

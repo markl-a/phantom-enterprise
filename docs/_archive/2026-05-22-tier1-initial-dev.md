@@ -8,7 +8,7 @@
 |---|---|---|---|
 | `ldap_sso/` | ~110 | interface stubs (ABC + 3 concrete) | shape tests pass; impl raises `NotImplementedError` |
 | `vpn_aware_routing/` | ~90 | **real, working** | live `tailscale status --json` |
-| `on_prem_gitlab/` | ~75 | **real, working** | live Gitea on z13 over Tailscale |
+| `on_prem_gitlab/` | ~75 | **real, working** | live Gitea on an on-prem host over Tailscale |
 | `mes_connector/` | 0 | placeholder README | — |
 | `erp_connector/` | 0 | placeholder README | — |
 | `confluence_jira/` | 0 | placeholder README | — |
@@ -42,7 +42,7 @@ Two connectors prove the architecture extends cleanly:
    hostname to its IP. Used by phantom-mesh to route enterprise traffic
    over Tailscale without exposing internal DNS.
 2. **`on_prem_gitlab.list_repos()`** — proves Tailscale → on-prem-git
-   reachability end-to-end via the maintainer's live Gitea on z13. The
+   reachability end-to-end via the maintainer's live on-prem Gitea. The
    same code shape works against self-hosted GitLab (swap `/api/v1` →
    `/api/v4`).
 
@@ -58,11 +58,11 @@ Two connectors prove the architecture extends cleanly:
 ## Test command
 
 ```bash
-cd /Users/marklight/Documents/GitHub/phantom-enterprise
+cd /path/to/phantom-enterprise
 pytest -v
 ```
 
-Live tests skip gracefully when Tailscale CLI is missing or z13 is offline.
+Live tests skip gracefully when Tailscale CLI is missing or the on-prem host is offline.
 
 ## What is explicitly out of scope right now
 

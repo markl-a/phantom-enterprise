@@ -65,10 +65,10 @@ If this fails, stop the demo. The remaining commands require a live tailnet.
 
 ## Step 2: Resolve a Tailnet Peer in Python
 
-Replace `z13` with the short host name of the on-prem Git machine:
+Replace `your-git-host` with the short host name of the on-prem Git machine:
 
 ```bash
-python -c "from vpn_aware_routing.router import tailscale_route; print(tailscale_route('z13'))"
+python -c "from vpn_aware_routing.router import tailscale_route; print(tailscale_route('your-git-host'))"
 ```
 
 Expected result:
@@ -96,7 +96,7 @@ peer is visible in `tailscale status --json`.
 For Gitea:
 
 ```bash
-export GITEA_BASE_URL="http://z13:3000"
+export GITEA_BASE_URL="http://your-git-host:3000"
 export GITEA_TOKEN="<optional-token>"
 ```
 
