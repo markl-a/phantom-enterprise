@@ -7,6 +7,7 @@ and piped to that local process; they are never uploaded anywhere by this tool.
 
 from __future__ import annotations
 
+import os
 import subprocess
 from dataclasses import dataclass
 from typing import Optional
@@ -50,9 +51,17 @@ def answer_with_phantom(
         source=context.source,
         blob=context.as_prompt_blob(),
     )
+    cmd = [phantom_bin, "exec"]
+    # Optional, env-driven provider passthrough. When PHANTOM_PROVIDER is set
+    # and non-empty, forward it as ``--provider <value>`` right after ``exec``.
+    # When unset/empty, the command is unchanged.
+    provider = os.environ.get("PHANTOM_PROVIDER", "").strip()
+    if provider:
+        cmd += ["--provider", provider]
+    cmd.append("--quiet")
     try:
         proc = subprocess.run(
-            [phantom_bin, "exec", "--quiet"],
+            cmd,
             input=prompt,
             text=True,
             capture_output=True,

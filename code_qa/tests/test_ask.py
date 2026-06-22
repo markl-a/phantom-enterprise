@@ -100,11 +100,63 @@ def test_answer_with_phantom_invokes_subprocess(monkeypatch, tmp_path):
         return FakeProc()
 
     monkeypatch.setattr(ask_mod.subprocess, "run", fake_run)
+    monkeypatch.delenv("PHANTOM_PROVIDER", raising=False)
     out = ask_mod.answer_with_phantom("q?", ctx, phantom_bin="phantom")
     assert out == "the answer"
     assert calls["cmd"][:2] == ["phantom", "exec"]
+    # No provider env -> argv unchanged, no --provider flag injected.
+    assert "--provider" not in calls["cmd"]
     assert "q?" in calls["input"]
     assert "a.py" in calls["input"]
+
+
+def test_answer_with_phantom_forwards_provider_env(monkeypatch):
+    from code_qa.context import RepoContext, SelectedFile
+
+    ctx = RepoContext(source="test", files=[SelectedFile("a.py", "x=1", 1.0)])
+    calls = {}
+
+    class FakeProc:
+        returncode = 0
+        stdout = "ok"
+        stderr = ""
+
+    def fake_run(cmd, **kwargs):
+        calls["cmd"] = cmd
+        return FakeProc()
+
+    monkeypatch.setattr(ask_mod.subprocess, "run", fake_run)
+    monkeypatch.setenv("PHANTOM_PROVIDER", "openai")
+    ask_mod.answer_with_phantom("q?", ctx, phantom_bin="phantom-x")
+
+    cmd = calls["cmd"]
+    # Injectable phantom_bin still honored.
+    assert cmd[0] == "phantom-x"
+    # --provider <value> inserted immediately after "exec".
+    assert cmd[:4] == ["phantom-x", "exec", "--provider", "openai"]
+    assert "--quiet" in cmd
+
+
+def test_answer_with_phantom_ignores_blank_provider_env(monkeypatch):
+    from code_qa.context import RepoContext, SelectedFile
+
+    ctx = RepoContext(source="test", files=[SelectedFile("a.py", "x=1", 1.0)])
+    calls = {}
+
+    class FakeProc:
+        returncode = 0
+        stdout = "ok"
+        stderr = ""
+
+    def fake_run(cmd, **kwargs):
+        calls["cmd"] = cmd
+        return FakeProc()
+
+    monkeypatch.setattr(ask_mod.subprocess, "run", fake_run)
+    monkeypatch.setenv("PHANTOM_PROVIDER", "   ")  # whitespace-only == empty
+    ask_mod.answer_with_phantom("q?", ctx, phantom_bin="phantom")
+
+    assert "--provider" not in calls["cmd"]
 
 
 def test_gitea_unreachable_propagates(monkeypatch):
