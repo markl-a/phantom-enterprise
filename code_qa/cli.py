@@ -109,6 +109,24 @@ def _cmd_status(args: argparse.Namespace) -> int:
     return 0 if result["healthy"] else 1
 
 
+def _cmd_demo_loop(args: argparse.Namespace) -> int:
+    from .demo_loop import main as demo_loop_main
+
+    return demo_loop_main(["--out", args.out])
+
+
+def _cmd_connector_matrix(args: argparse.Namespace) -> int:
+    from .connector_matrix import main as connector_matrix_main
+
+    return connector_matrix_main(["--out", args.out])
+
+
+def _cmd_knowledge_scenario(args: argparse.Namespace) -> int:
+    from .knowledge_lookup_scenario import main as knowledge_scenario_main
+
+    return knowledge_scenario_main(["--out", args.out])
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="phantom-enterprise",
@@ -182,6 +200,36 @@ def build_parser() -> argparse.ArgumentParser:
         help="Override Gitea base URL for the Git readiness check.",
     )
     s.set_defaults(func=_cmd_status)
+
+    d = sub.add_parser(
+        "demo-loop",
+        help=(
+            "Write a deterministic synthetic local-code Q&A bundle with "
+            "citations, evidence, and audit metadata."
+        ),
+    )
+    d.add_argument("--out", required=True, help="directory to write the demo bundle")
+    d.set_defaults(func=_cmd_demo_loop)
+
+    m = sub.add_parser(
+        "connector-matrix",
+        help=(
+            "Write a deterministic mock connector matrix with permission "
+            "boundary and metadata-only audit artifacts."
+        ),
+    )
+    m.add_argument("--out", required=True, help="directory to write the connector bundle")
+    m.set_defaults(func=_cmd_connector_matrix)
+
+    k = sub.add_parser(
+        "knowledge-scenario",
+        help=(
+            "Write a deterministic enterprise knowledge lookup scenario with "
+            "mock connectors, citations, permission review, and metadata audit."
+        ),
+    )
+    k.add_argument("--out", required=True, help="directory to write the scenario bundle")
+    k.set_defaults(func=_cmd_knowledge_scenario)
     return p
 
 
