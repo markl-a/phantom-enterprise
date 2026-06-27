@@ -12,7 +12,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install -e ".[dev]"
-      - run: pytest -ra -q
+      - run: python -m pip install -e .[dev]
+      - run: python -m pip wheel . --no-deps -w dist-smoke
+      - run: python -m ruff check .
+      - run: python -m pytest -ra -q
+      - name: deterministic enterprise smoke
+        run: |
+          python -m code_qa.cli demo-loop --out demo-loop-smoke
+          python -m code_qa.cli connector-matrix --out connector-matrix-smoke
+          python -m code_qa.cli knowledge-scenario --out knowledge-scenario-smoke
       - name: release-prep gate
         run: python -m pytest code_qa/tests/test_release_prep_contract.py -q

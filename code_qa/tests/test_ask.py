@@ -11,13 +11,13 @@ from urllib.parse import unquote
 import pytest
 
 import importlib
+from code_qa.cli import build_parser
+from code_qa.context import build_local_context
 from on_prem_gitlab import gitlab as gitlab_mod
 
 # NB: code_qa/__init__ re-exports the ``ask`` function, which shadows the
 # ``code_qa.ask`` submodule attribute. Pull the real module from sys.modules.
 ask_mod = importlib.import_module("code_qa.ask")
-from code_qa.context import build_local_context
-from code_qa.cli import build_parser
 
 
 def _make_repo(tmp_path: Path) -> Path:

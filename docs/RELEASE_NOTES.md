@@ -9,6 +9,9 @@ Status: release candidate approved and tagged.
 - Local-first public demo path documented in `README.md`.
 - P3 scenario proof artifacts documented and tested.
 - P4 governance, security, release checklist, changelog, and final audit documents.
+- Public package metadata includes Apache-2.0 classifier, Python 3.11 classifier, GitHub project URLs, and a `dev` extra for verification tooling.
+- Package version uses PEP 440 alpha metadata `0.1.0a0`, matching the approved `v0.1.0-alpha.0` release-candidate tag.
+- CI installs the package, builds a wheel, runs ruff, runs the full test suite, and runs deterministic synthetic enterprise smoke paths.
 - High-confidence secret scan recorded as `high_conf_secret_hits=0`.
 - Direct dependency/license review recorded in `docs/FINAL_RELEASE_AUDIT.md`.
 

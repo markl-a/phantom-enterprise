@@ -17,7 +17,7 @@ def _pkg_version() -> str:
     try:
         return importlib.metadata.version("phantom-enterprise")
     except importlib.metadata.PackageNotFoundError:
-        return "0.1.0"
+        return "0.1.0a0"
 
 
 def _cmd_ask(args: argparse.Namespace) -> int:

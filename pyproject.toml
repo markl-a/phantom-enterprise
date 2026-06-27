@@ -1,14 +1,31 @@
 [project]
 name = "phantom-enterprise"
-version = "0.1.0"
+version = "0.1.0a0"
 description = "Enterprise connector pack for phantom-mesh (LDAP/SSO, VPN routing, on-prem Git, MES/ERP, Apple Silicon HA)"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 authors = [{ name = "Mark Light", email = "m4932981@gmail.com" }]
+keywords = ["enterprise", "on-prem", "connectors", "code-qa", "phantom-mesh"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: System :: Systems Administration",
+]
 dependencies = [
     "requests>=2.31",
 ]
+
+[project.urls]
+Homepage = "https://github.com/markl-a/phantom-enterprise"
+Repository = "https://github.com/markl-a/phantom-enterprise"
+Issues = "https://github.com/markl-a/phantom-enterprise/issues"
+Changelog = "https://github.com/markl-a/phantom-enterprise/blob/main/CHANGELOG.md"
 
 [project.scripts]
 phantom-enterprise = "code_qa.cli:main"
@@ -19,6 +36,7 @@ phantom-enterprise-knowledge-scenario = "code_qa.knowledge_lookup_scenario:main"
 [project.optional-dependencies]
 dev = [
     "pytest>=7",
+    "ruff>=0.6",
 ]
 
 [tool.setuptools.packages.find]

@@ -169,3 +169,27 @@ Evidence:
 - `python -m pytest -q`: 119 passed, 8 skipped.
 
 Remaining P4 work: none for the approved release-candidate tag.
+
+## P4 Release-Prep Slice 5
+
+Status: public release gate hardened and verified for package metadata, PEP 440 alpha versioning, CI installability, wheel build, ruff, public synthetic enterprise smoke paths, and current release evidence.
+
+Evidence:
+- `pyproject.toml` now uses PEP 440 alpha version `0.1.0a0`, matching the approved `v0.1.0-alpha.0` release-candidate tag.
+- `pyproject.toml` includes public package classifiers, GitHub project URLs, and a `dev` extra for release verification tooling.
+- `.github/workflows/ci.yml` installs `.[dev]`, builds a wheel with `python -m pip wheel . --no-deps -w dist-smoke`, runs ruff, runs the full pytest suite, runs deterministic `demo-loop`, `connector-matrix`, and `knowledge-scenario` smoke paths, and runs the release-prep gate.
+- `CHANGELOG.md` now records `0.1.0-alpha.0 - 2026-06-27` as the approved release candidate instead of the stale not-release-ready status.
+- `docs/FINAL_RELEASE_AUDIT.md` records current install, wheel, CLI help, synthetic demo-loop, connector-matrix, knowledge-scenario, dependency/license, ruff, pytest, and high-confidence secret scan evidence.
+- `python -m pytest code_qa\tests\test_packaging.py code_qa\tests\test_release_prep_contract.py -q`: 8 passed.
+- `python -m pip install -e . --dry-run --no-deps`: editable metadata OK; would install `phantom-enterprise-0.1.0a0`.
+- `python -m pip wheel . --no-deps -w <temp>`: built `phantom_enterprise-0.1.0a0-py3-none-any.whl`.
+- `python -m code_qa.cli --help`: help OK.
+- `python -m code_qa.cli demo-loop --out <bundle>`: wrote synthetic local-code Q&A manifest with `synthetic_only=true`, `live_connectors=false`, `external_network=false`, and `local_llm_required=false`.
+- `python -m code_qa.cli connector-matrix --out <bundle>`: wrote mock connector matrix manifest with `synthetic_only=true`, `live_connectors=false`, `external_network=false`, `credentials_required=false`, and `permission_boundary=mock_metadata_only`.
+- `python -m code_qa.cli knowledge-scenario --out <scenario>`: wrote synthetic enterprise lookup manifest with `synthetic_only=true`, `live_connectors=false`, `external_network=false`, `credentials_required=false`, `local_llm_required=false`, and `permission_boundary=mock_metadata_only`.
+- Current dependency/license review: `requests==2.32.5`, Apache-2.0.
+- `python -m ruff check .`: all checks passed.
+- High-confidence secret scan: `high_conf_secret_hits=0`.
+- `python -m pytest -q`: 122 passed, 8 skipped. The skipped tests are live-gated and require `PHANTOM_ENTERPRISE_LIVE=1` plus external VPN, Gitea, or Atlassian services.
+
+Remaining P4 work: none for the current approved public source release candidate.
