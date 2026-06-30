@@ -32,12 +32,14 @@ phantom-enterprise = "code_qa.cli:main"
 phantom-enterprise-demo-loop = "code_qa.demo_loop:main"
 phantom-enterprise-connector-matrix = "code_qa.connector_matrix:main"
 phantom-enterprise-knowledge-scenario = "code_qa.knowledge_lookup_scenario:main"
+phantom-enterprise-mcp = "code_qa.mcp_server:main"
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7",
     "ruff>=0.6",
 ]
+mcp = ["mcp>=1"]
 
 [tool.setuptools.packages.find]
 where = ["."]

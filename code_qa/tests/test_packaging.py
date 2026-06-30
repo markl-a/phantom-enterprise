@@ -22,6 +22,7 @@ def test_pyproject_declares_installable_console_scripts() -> None:
         "phantom-enterprise-demo-loop": "code_qa.demo_loop:main",
         "phantom-enterprise-connector-matrix": "code_qa.connector_matrix:main",
         "phantom-enterprise-knowledge-scenario": "code_qa.knowledge_lookup_scenario:main",
+        "phantom-enterprise-mcp": "code_qa.mcp_server:main",
     }
 
 
